@@ -1,7 +1,12 @@
 <?php
 
-$serverName = "localhost\SQLExpress";
-$connectionOptions = array( "Database" => "geologia", "Uid" => "sa", "PWD" => "master" );
+$serverName = "(local)\sqlexpress";
+$connectionOptions = array(
+    "database" => "AdventureWorks2012",
+    "uid" => "sa",
+    "pwd" => "master"
+);
+
 //Establishes the connection
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 //Select Query

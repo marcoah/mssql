@@ -20,19 +20,22 @@ PARTICULAR PURPOSE.
 <h5 align='center'>This application is a demonstration of the   
                    procedural API (SQLSRV driver) of the Microsoft  
                    Drivers for PHP for SQL Server.</h5><br/>  
-<?php  
-$serverName = "(local)\sqlexpress";  
-$connectionOptions = array("Database"=>"AdventureWorks2012");  
+                   
+<?php
+
+$serverName = "(local)\sqlexpress";
+$connectionOptions = array(
+    "database" => "AdventureWorks2012",
+    "uid" => "sa",
+    "pwd" => "master"
+);
 
 /* Connect using Windows Authentication. */  
-$conn = sqlsrv_connect( $serverName, $connectionOptions);  
-if( $conn === false )  
-die( FormatErrors( sqlsrv_errors() ) );  
+$conn = sqlsrv_connect($serverName,$connectionOptions);  
+if($conn === false) die(FormatErrors(sqlsrv_errors()));
 
-if(isset($_REQUEST['action']))  
-{  
-switch( $_REQUEST['action'] )  
-{  
+if(isset($_REQUEST['action'])){
+    switch( $_REQUEST['action'] ){  
 /* Get AdventureWorks products by querying   
    against the product name.*/  
 case 'getproducts':  
@@ -47,21 +50,17 @@ $getProducts = sqlsrv_query($conn, $tsql, $params, $cursorType);
 if ( $getProducts === false)  
 die( FormatErrors( sqlsrv_errors() ) );  
 
-if(sqlsrv_has_rows($getProducts))  
-{  
-$rowCount = sqlsrv_num_rows($getProducts);  
-BeginProductsTable($rowCount);  
-while( $row = sqlsrv_fetch_array( $getProducts, SQLSRV_FETCH_ASSOC))  
-{  
-PopulateProductsTable( $row );  
-}  
-EndProductsTable();  
-}  
-else  
-{  
-DisplayNoProdutsMsg();  
-}  
-GetSearchTerms( !null );  
+if(sqlsrv_has_rows($getProducts)){
+    $rowCount = sqlsrv_num_rows($getProducts);
+    BeginProductsTable($rowCount);
+    while($row = sqlsrv_fetch_array($getProducts, SQLSRV_FETCH_ASSOC)){
+        PopulateProductsTable( $row );
+    }
+    EndProductsTable();
+} else {
+    DisplayNoProdutsMsg();
+}
+GetSearchTerms(!null);  
 
 /* Free the statement and connection resources. */  
 sqlsrv_free_stmt( $getProducts );  
@@ -415,16 +414,13 @@ function PopulateProductsTable( $values )
             </form></td></tr>";  
 }  
 
-function FormatErrors( $errors )  
-{  
-    /* Display errors. */  
-    echo "Error information: <br/>";  
-
-    foreach ( $errors as $error )  
-    {  
+function FormatErrors($errors){
+    /* Display errors. */
+    echo "Error information: <br/>";
+    foreach ($errors as $error){
         echo "SQLSTATE: ".$error['SQLSTATE']."<br/>";  
         echo "Code: ".$error['code']."<br/>";  
-        echo "Message: ".$error['message']."<br/>";  
+        echo "Message: ".$error['message']."<br/>";
     }  
 }  
 ?>  
