@@ -23,11 +23,22 @@ PARTICULAR PURPOSE.
                    
 <?php
 
-$serverName = "(local)\sqlexpress";
+    require('vendor/autoload.php');
+
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+
+    /* Database config */
+    $db_serv = $_ENV['DB_SERVER'];;
+    $db_user = $_ENV['DB_USERNAME'];
+    $db_pass = $_ENV['DB_PASSWORD'];
+    $db_daba = $_ENV['DB_DATABASE'];; 
+
+$serverName = $db_serv;
 $connectionOptions = array(
-    "database" => "AdventureWorks2012",
-    "uid" => "sa",
-    "pwd" => "master"
+    "database" => $db_daba,
+    "uid" => $db_user,
+    "pwd" => $db_pass
 );
 
 /* Connect using Windows Authentication. */  
