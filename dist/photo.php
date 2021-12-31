@@ -1,19 +1,25 @@
 <?php  
-/*=============  
-This file is part of a Microsoft SQL Server Shared Source Application.  
-Copyright (C) Microsoft Corporation.  All rights reserved.  
+    require('../vendor/autoload.php');
 
-THIS CODE AND INFORMATION ARE PROVIDED "AS IS" WITHOUT WARRANTY OF ANY  
-KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE  
-IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A  
-PARTICULAR PURPOSE.  
-============= */  
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
 
-$serverName = "(local)\sqlexpress";  
-$connectionInfo = array( "Database"=>"AdventureWorks2012");
+    /* Database config */
+    $db_serv = $_ENV['DB_SERVER'];;
+    $db_user = $_ENV['DB_USERNAME'];
+    $db_pass = $_ENV['DB_PASSWORD'];
+    $db_daba = $_ENV['DB_DATABASE'];; 
+
+    $serverName = $db_serv;
+    $connectionOptions = array(
+        "database" => $db_daba,
+        "uid" => $db_user,
+        "pwd" => $db_pass
+    );
+
 
 /* Connect using Windows Authentication. */  
-$conn = sqlsrv_connect( $serverName, $connectionInfo);  
+$conn = sqlsrv_connect( $serverName, $connectionOptions);  
 if( $conn === false )  
 {  
      echo "Could not connect.\n";  
