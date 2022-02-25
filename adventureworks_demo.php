@@ -1,7 +1,8 @@
 <html>  
 <head>  
     <title>AdventureWorks Product Reviews</title>  
-</head>  
+</head>
+
 <body>  
 <h1 align='center'>AdventureWorks Product Reviews</h1>  
 <h5 align='center'>This application is a demonstration of the procedural API (SQLSRV driver) of the Microsoft Drivers for PHP for SQL Server.</h5><br/>  
