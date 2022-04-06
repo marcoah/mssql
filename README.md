@@ -1,9 +1,9 @@
-# mssql
-Pruebas de PHP con SQL Server
+# Prueba con SQL Server
+Consulta AdventureWorks en SQL Server con PHP
 
-
-Correr
-
-cp .env.example /dist/.env
+## Instalación
+cp .env.example .env
 composer install
 npm install
+
+## Licencia
