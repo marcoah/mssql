@@ -1,6 +1,14 @@
-<html>  
-<head>  
-    <title>AdventureWorks Product Reviews</title>  
+<!doctype html>
+<html lang="es">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+   
 </head>
 
 <body>  
@@ -27,101 +35,101 @@
         "pwd" => $db_pass
     );
 
-/* Connect using Windows Authentication. */  
-$conn = sqlsrv_connect($serverName,$connectionOptions);
+    /* Connect using Windows Authentication. */  
+    $conn = sqlsrv_connect($serverName,$connectionOptions);
 
-if($conn === false) die(FormatErrors(sqlsrv_errors()));
+    if($conn === false) die(FormatErrors(sqlsrv_errors()));
 
-if(isset($_REQUEST['action'])){
-    switch( $_REQUEST['action'] ){
-        case 'getproducts':
-            $params = array(&$_POST['query']);
-            $tsql = "SELECT ProductID, Name, Color, Size, ListPrice FROM Production.Product WHERE Name LIKE '%' + ? + '%' AND ListPrice > 0.0";
-            $cursorType = array("Scrollable" => SQLSRV_CURSOR_KEYSET);
-            $getProducts = sqlsrv_query($conn, $tsql, $params, $cursorType);
-            if ($getProducts === false) die(FormatErrors( sqlsrv_errors()));
-            if(sqlsrv_has_rows($getProducts)){
-                $rowCount = sqlsrv_num_rows($getProducts);
-                BeginProductsTable($rowCount);
-                while($row = sqlsrv_fetch_array($getProducts, SQLSRV_FETCH_ASSOC)){
-                    PopulateProductsTable( $row );
+    if(isset($_REQUEST['action'])){
+        switch( $_REQUEST['action'] ){
+            case 'getproducts':
+                $params = array(&$_POST['query']);
+                $tsql = "SELECT ProductID, Name, Color, Size, ListPrice FROM Production.Product WHERE Name LIKE '%' + ? + '%' AND ListPrice > 0.0";
+                $cursorType = array("Scrollable" => SQLSRV_CURSOR_KEYSET);
+                $getProducts = sqlsrv_query($conn, $tsql, $params, $cursorType);
+                if ($getProducts === false) die(FormatErrors( sqlsrv_errors()));
+                if(sqlsrv_has_rows($getProducts)){
+                    $rowCount = sqlsrv_num_rows($getProducts);
+                    BeginProductsTable($rowCount);
+                    while($row = sqlsrv_fetch_array($getProducts, SQLSRV_FETCH_ASSOC)){
+                        PopulateProductsTable( $row );
+                    }
+                    EndProductsTable();
+                } else {
+                    DisplayNoProdutsMsg();
                 }
-                EndProductsTable();
-            } else {
-                DisplayNoProdutsMsg();
-            }
-            GetSearchTerms(!null);
+                GetSearchTerms(!null);
+                
+                sqlsrv_free_stmt( $getProducts );
+                sqlsrv_close( $conn );
+                break;
+                
+            case 'getreview':
+                GetPicture( $_GET['productid'] );
+                GetReviews( $conn, $_GET['productid'] );
+                sqlsrv_close( $conn );
+                break;
             
-            sqlsrv_free_stmt( $getProducts );
-            sqlsrv_close( $conn );
-            break;
+            case 'writereview':
+                DisplayWriteReviewForm( $_POST['productid'] );
+                break;
             
-        case 'getreview':
-            GetPicture( $_GET['productid'] );
-            GetReviews( $conn, $_GET['productid'] );
-            sqlsrv_close( $conn );
-            break;
-        
-        case 'writereview':
-            DisplayWriteReviewForm( $_POST['productid'] );
-            break;
-        
-        case 'submitreview':
-            $comments = "data://text/plain,".$_POST['comments'];
-            $stream = fopen( $comments, "r" );
-            $tsql = "INSERT INTO Production.ProductReview (ProductID, ReviewerName, ReviewDate, EmailAddress, Rating, Comments) VALUES (?,?,?,?,?,?)";
-            $params = array(&$_POST['productid'],&$_POST['name'],date("Y-m-d"),&$_POST['email'], &$_POST['rating'], &$stream);
-            $insertReview = sqlsrv_prepare($conn, $tsql, $params);
-            if($insertReview === false) die(FormatErrors(sqlsrv_errors()));
-            if(sqlsrv_execute($insertReview) === false) die( FormatErrors( sqlsrv_errors() ) );
-            sqlsrv_free_stmt( $insertReview );
-            GetSearchTerms(true);
-            GetReviews($conn, $_POST['productid']);
-            sqlsrv_close( $conn );
-            break;  
+            case 'submitreview':
+                $comments = "data://text/plain,".$_POST['comments'];
+                $stream = fopen( $comments, "r" );
+                $tsql = "INSERT INTO Production.ProductReview (ProductID, ReviewerName, ReviewDate, EmailAddress, Rating, Comments) VALUES (?,?,?,?,?,?)";
+                $params = array(&$_POST['productid'],&$_POST['name'],date("Y-m-d"),&$_POST['email'], &$_POST['rating'], &$stream);
+                $insertReview = sqlsrv_prepare($conn, $tsql, $params);
+                if($insertReview === false) die(FormatErrors(sqlsrv_errors()));
+                if(sqlsrv_execute($insertReview) === false) die( FormatErrors( sqlsrv_errors() ) );
+                sqlsrv_free_stmt( $insertReview );
+                GetSearchTerms(true);
+                GetReviews($conn, $_POST['productid']);
+                sqlsrv_close( $conn );
+                break;  
 
-        /* Display a picture of the selected product.*/  
-        case 'displaypicture':  
-            $tsql = "SELECT Name   
-                     FROM Production.Product   
-                     WHERE ProductID = ?";
-            $getName = sqlsrv_query($conn, $tsql, array(&$_GET['productid']));  
-            if( $getName === false ) die( FormatErrors( sqlsrv_errors() ) );  
-            if ( sqlsrv_fetch( $getName ) === false ) die( FormatErrors( sqlsrv_errors() ) );  
-            $name = sqlsrv_get_field( $getName, 0);  
-            DisplayUploadPictureForm( $_GET['productid'], $name );  
-            sqlsrv_close( $conn );  
-            break;  
+            /* Display a picture of the selected product.*/  
+            case 'displaypicture':  
+                $tsql = "SELECT Name   
+                        FROM Production.Product   
+                        WHERE ProductID = ?";
+                $getName = sqlsrv_query($conn, $tsql, array(&$_GET['productid']));  
+                if( $getName === false ) die( FormatErrors( sqlsrv_errors() ) );  
+                if ( sqlsrv_fetch( $getName ) === false ) die( FormatErrors( sqlsrv_errors() ) );  
+                $name = sqlsrv_get_field( $getName, 0);  
+                DisplayUploadPictureForm( $_GET['productid'], $name );  
+                sqlsrv_close( $conn );  
+                break;  
 
-        /* Upload a new picture for the selected product. */  
-        case 'uploadpicture':  
-            $tsql = "INSERT INTO Production.ProductPhoto (LargePhoto) VALUES (?); SELECT SCOPE_IDENTITY() AS PhotoID";  
-            $fileStream = fopen($_FILES['file']['tmp_name'], "r");  
-            $uploadPic = sqlsrv_prepare($conn, $tsql, array( array(&$fileStream, SQLSRV_PARAM_IN, SQLSRV_PHPTYPE_STREAM(SQLSRV_ENC_BINARY), SQLSRV_SQLTYPE_VARBINARY('max'))));  
-            if( $uploadPic === false ) die( FormatErrors( sqlsrv_errors() ) );  
-            if( sqlsrv_execute($uploadPic) === false ) die( FormatErrors( sqlsrv_errors() ) );
-            /*Skip the open result set (row affected). */
-            $next_result = sqlsrv_next_result($uploadPic);
-            if( $next_result === false ) die( FormatErrors( sqlsrv_errors() ) );
-            /* Fetch the next result set. */
-            if( sqlsrv_fetch($uploadPic) === false) die( FormatErrors( sqlsrv_errors() ) );
-            /* Get the first field - the identity from INSERT. */
-            $photoID = sqlsrv_get_field($uploadPic, 0);
-            /* Associate the new photoID with the productID. */
-            $tsql = "UPDATE Production.ProductProductPhoto SET ProductPhotoID = ? WHERE ProductID = ?";
-            $reslt = sqlsrv_query($conn, $tsql, array(&$photoID, &$_POST['productid']));
-            if($reslt === false ) die( FormatErrors( sqlsrv_errors() ) ); 
-            GetPicture( $_POST['productid']);
-            DisplayWriteReviewButton( $_POST['productid'] );
-            GetSearchTerms (!null);
-            sqlsrv_close( $conn );
-            break;
-        }//End Switch
-    }
-    else
-    {  
-    GetSearchTerms( !null );
-}  
+            /* Upload a new picture for the selected product. */  
+            case 'uploadpicture':  
+                $tsql = "INSERT INTO Production.ProductPhoto (LargePhoto) VALUES (?); SELECT SCOPE_IDENTITY() AS PhotoID";  
+                $fileStream = fopen($_FILES['file']['tmp_name'], "r");  
+                $uploadPic = sqlsrv_prepare($conn, $tsql, array( array(&$fileStream, SQLSRV_PARAM_IN, SQLSRV_PHPTYPE_STREAM(SQLSRV_ENC_BINARY), SQLSRV_SQLTYPE_VARBINARY('max'))));  
+                if( $uploadPic === false ) die( FormatErrors( sqlsrv_errors() ) );  
+                if( sqlsrv_execute($uploadPic) === false ) die( FormatErrors( sqlsrv_errors() ) );
+                /*Skip the open result set (row affected). */
+                $next_result = sqlsrv_next_result($uploadPic);
+                if( $next_result === false ) die( FormatErrors( sqlsrv_errors() ) );
+                /* Fetch the next result set. */
+                if( sqlsrv_fetch($uploadPic) === false) die( FormatErrors( sqlsrv_errors() ) );
+                /* Get the first field - the identity from INSERT. */
+                $photoID = sqlsrv_get_field($uploadPic, 0);
+                /* Associate the new photoID with the productID. */
+                $tsql = "UPDATE Production.ProductProductPhoto SET ProductPhotoID = ? WHERE ProductID = ?";
+                $reslt = sqlsrv_query($conn, $tsql, array(&$photoID, &$_POST['productid']));
+                if($reslt === false ) die( FormatErrors( sqlsrv_errors() ) ); 
+                GetPicture( $_POST['productid']);
+                DisplayWriteReviewButton( $_POST['productid'] );
+                GetSearchTerms (!null);
+                sqlsrv_close( $conn );
+                break;
+            }//End Switch
+        }
+        else
+        {  
+        GetSearchTerms( !null );
+    }  
 
 function GetPicture( $productID )  
 {  
