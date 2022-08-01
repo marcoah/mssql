@@ -7,3 +7,6 @@ composer install
 npm install
 
 ## Licencia
+
+## Copyright
+2022 MH Consultores CA
