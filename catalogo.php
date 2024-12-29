@@ -39,10 +39,13 @@
                 </div>
             </div>
         </section>
-        
+
+        <?php  $a = array(1, 2, 3, 4, 5, 6, 7, 8, 9); ?>
+
         <div class="album py-5 bg-light">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                    <?php foreach ($a as $v) { ?>
                     <div class="col">
                         <div class="card shadow-sm">
                             <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"/><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
@@ -53,14 +56,18 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
                                     </div>
-                                    <small class="text-muted">9 mins</small>
+                                    <small class="text-muted">
+                                        <?php echo $v; ?>
+                                    </small>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <?php } ?>
                 </div>
             </div>
-        </div>
+        </div>        
+
     </main>
 
     <footer class="text-muted py-5">
