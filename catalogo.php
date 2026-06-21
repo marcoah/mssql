@@ -1,3 +1,17 @@
+<?php
+require('vendor/autoload.php');
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+/* Database config */
+$db_serv = $_ENV['DB_SERVER'];;
+$db_user = $_ENV['DB_USERNAME'];
+$db_pass = $_ENV['DB_PASSWORD'];
+$db_daba = $_ENV['DB_DATABASE'];;
+
+?>
+
 <!doctype html>
 <html lang="en">
 
@@ -44,17 +58,39 @@
 
         <?php $a = array(1, 2, 3, 4, 5, 6, 7, 8, 9); ?>
 
+        <?php
+        $serverName = $db_serv;
+        $connectionOptions = array(
+            "database" => $db_daba,
+            "uid" => $db_user,
+            "pwd" => $db_pass
+        );
+
+        $conn = sqlsrv_connect($db_serv, $connectionOptions);
+        if ($conn === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }
+
+        $sql = "SELECT [ProductID], [Name], [ProductNumber], [ListPrice] FROM [Production].[Product]";
+        $stmt = sqlsrv_query($conn, $sql);
+        if ($stmt === false) {
+            die(print_r(sqlsrv_errors(), true));
+        }
+
+        ?>
+
         <div class="album py-5 bg-light">
             <div class="container">
                 <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-                    <?php foreach ($a as $v) { ?>
+                    <?php while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) { ?>
                         <div class="col">
                             <div class="card shadow-sm">
                                 <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
-                                    <title>Placeholder</title>
+                                    <title></title>
                                     <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text>
                                 </svg>
                                 <div class="card-body">
+                                    <h4><?php echo 'ID:' . $row['ProductID'] . '-' . $row['Name']; ?></h4>
                                     <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div class="btn-group">
@@ -62,13 +98,16 @@
                                             <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
                                         </div>
                                         <small class="text-muted">
-                                            <?php echo $v; ?>
+                                            <?php echo 'Precio: ' . number_format($row['ListPrice'], 2, ',', '.'); ?>
                                         </small>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    <?php } ?>
+                    <?php
+                    }
+                    sqlsrv_free_stmt($stmt);
+                    ?>
                 </div>
             </div>
         </div>

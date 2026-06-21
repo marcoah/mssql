@@ -39,7 +39,7 @@ $db_daba = $_ENV['DB_DATABASE'];;
                 <tbody>
 
                     <?php
-                    $serverName = "(local)\sqlexpress";
+                    $serverName = $db_serv;
                     $connectionOptions = array(
                         "database" => $db_daba,
                         "uid" => $db_user,
